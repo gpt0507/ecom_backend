@@ -34,7 +34,23 @@ const getSingleProductController = async (req, res) => {
   }
 };
 
-module.exports = { getAllProductsController, getSingleProductController }
+
+
+// // ADD PRODUCT
+// const addProductController = async (req, res) => {
+//   try {
+//     const { id, title, price, description, category, image, rating } = req.body;
+//     const newProduct = new productDB({ id, title, price, description, category, image, rating });
+//     await newProduct.save();
+//     res.status(201).json({ message: "Product Added Successfully", product: newProduct });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ error: "Failed to add product" });
+//   }
+// };
+
+module.exports = { getAllProductsController, getSingleProductController };
+// module.exports = { getAllProductsController, getSingleProductController, addProductController };
 
 
 

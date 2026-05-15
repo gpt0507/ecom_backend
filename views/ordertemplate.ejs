@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Order Mail</title>
+</head>
+
+<body style="font-family:Arial">
+
+  <div style=" max-width:700px; margin:auto; border:1px solid #ddd; padding:20px;">
+    <h1 style="color:green"> Order Confirmed 🎉 </h1>
+
+    <p>
+      Hello
+      <strong>
+        <%= user.firstname %>
+          <%= user.lastname %>
+      </strong>
+    </p>
+
+    <p>Thank you for your order.</p>
+
+    <hr />
+
+    <h2>Order Summary</h2>
+
+    <% carts.forEach((item)=>{ %>
+      <div style="border-bottom:1px solid #ccc; padding:10px 0;">
+        <img src="<%= item.image %>" width="70" height="70" style="object-fit:contain" />
+
+        <h4>
+          <%= item.title %>
+        </h4>
+
+        <p>
+          Quantity:
+          <%= item.qty %>
+        </p>
+
+        <p>
+          Price:
+          ₹<%= item.price * item.qty %>
+        </p>
+
+      </div>
+
+      <% }) %>
+
+        <hr />
+
+        <h3>
+          Total Items:
+          <%= totalQty %>
+        </h3>
+
+        <h2 style="color:green">
+          Total Price:
+          ₹<%= totalPrice %>
+        </h2>
+
+  </div>
+
+</body>
+
+</html>
