@@ -8,7 +8,7 @@ const crypto = require("crypto");
 // razorpay instance
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
+  key_secret: process.env.RAZORPAY_SECRET,
 });
 
 // create order route
@@ -36,7 +36,7 @@ router.post("/verify-payment", async (req, res) => {
 
     // create generated signature
     const generated_signature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .createHmac("sha256", process.env.RAZORPAY_SECRET)
       .update(razorpay_order_id + "|" + razorpay_payment_id)
       .digest("hex");
 
