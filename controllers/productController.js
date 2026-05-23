@@ -1,7 +1,8 @@
 const productDB = require("../models/productModel");
+const cloudinary = require("../Cloudinary/cloudinary");
 
 const getAllProductsController = async (req, res) => {
-  console.log("all product request received from user");
+  // console.log("all product request received from user");
 
   try {
     const products = await productDB.find();
@@ -9,14 +10,14 @@ const getAllProductsController = async (req, res) => {
     res.status(200).json(products);
 
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({ error: "Failed to fetch products" });
   }
 };
 
 
 const getSingleProductController = async (req, res) => {
-  console.log("single product request received from user");
+  // console.log("single product request received from user");
 
   try {
     const { id } = req.params;
@@ -29,28 +30,64 @@ const getSingleProductController = async (req, res) => {
     res.status(200).json(product);
 
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({ error: "Failed to fetch product" });
   }
 };
 
 
 
-// // ADD PRODUCT
-// const addProductController = async (req, res) => {
-//   try {
-//     const { id, title, price, description, category, image, rating } = req.body;
-//     const newProduct = new productDB({ id, title, price, description, category, image, rating });
-//     await newProduct.save();
-//     res.status(201).json({ message: "Product Added Successfully", product: newProduct });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ error: "Failed to add product" });
-//   }
-// };
+// ADD PRODUCT
+const addProductController = async (req, res) => {
+  try {
+    // console.log('product controller called\n add product api called')
+    // console.log('request body is', req.body)
+    // console.log('request file is', req.file)
+    // res.send('product inserted successfully');
 
-module.exports = { getAllProductsController, getSingleProductController };
-// module.exports = { getAllProductsController, getSingleProductController, addProductController };
+    const { id, title, price, description, category, rate, count } = req.body;
+
+
+    // validation
+    if (!id || !title || !price || !description || !category || !rate || !count || !req.file) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+
+    // cloudinary upload
+    const filePath = req.file?.path;
+    const uploadedImage = await cloudinary.uploader.upload(filePath);
+
+
+    // console.log('file path is', filePath)
+    // console.log("upload url is", uploadedImage.url)
+    // res.send('product inserted successfully');
+
+
+    // save in DB
+    const newProduct = new productDB({
+      id,
+      title,
+      price,
+      description,
+      category,
+      image: uploadedImage.secure_url,
+      rating: { rate, count }
+    });
+
+    await newProduct.save();
+
+    res.status(201).json({ message: "Product Added Successfully", product: newProduct });
+  } catch (error) {
+
+    // console.log("FULL ERROR => ", error);
+    res.status(500).json({ success: false, message: error.message, error });
+  }
+};
+
+
+// module.exports = { getAllProductsController, getSingleProductController };
+module.exports = { getAllProductsController, getSingleProductController, addProductController };
 
 
 

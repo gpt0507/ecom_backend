@@ -37,7 +37,7 @@ const adminMiddleware = async (req, res, next) => {
     next();
 
   } catch (error) {
-    console.log("Middleware Error:", error);
+    // console.log("Middleware Error:", error);
     return res.status(401).json({ error: "Unauthorized" });
   }
 };

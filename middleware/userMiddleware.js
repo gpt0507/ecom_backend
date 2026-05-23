@@ -31,7 +31,7 @@ const userMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.log("Middleware error:", error);
+    // console.log("Middleware error:", error);
     res.status(401).json({ error: "Unauthorized" });
   }
 };

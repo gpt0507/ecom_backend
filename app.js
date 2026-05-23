@@ -1,15 +1,26 @@
 require('dotenv').config();
 const express = require("express");
 const app = express();
+const Razorpay = require("razorpay");
+const path = require("path");
+const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const ejs = require("ejs");
-const path = require("path");
 const cors = require('cors');
 const port = 4009
 require('./config/db')
 
 app.use(cors());
 app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
+
+// view engine
+app.set("view engine", "ejs");
+
+// static folder
+app.use(express.static("public"));
+
 
 // Nodemailer Transporter
 const transporter = nodemailer.createTransport({
@@ -19,43 +30,6 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL,
     pass: process.env.PASSWORD
-  }
-});
-
-
-
-// ================= SEND ORDER MAIL =================
-app.post("/send-order-mail", async (req, res) => {
-  try {
-    const { user, carts, totalQty, totalPrice } = req.body;
-
-    console.log('user is', user);
-    console.log('carts is', carts);
-    console.log('totalQty is', totalQty);
-    console.log('totalPrice is', totalPrice);
-
-
-    // ====== EJS TEMPLATE RENDER ======
-    const templatePath = path.join(__dirname, "views", "ordertemplate.ejs");
-    console.log("template path is", templatePath)
-
-    const html = await ejs.renderFile(templatePath, { user, carts, totalQty, totalPrice });
-    console.log("html file is", html)
-
-    // ====== SEND MAIL ======
-
-    const info = await transporter.sendMail({
-      from: "Gaurav Agrawal <codewalesir@gmail.com>",
-      to: user.email,
-      subject: "Your Order Confirmed 🎉",
-      html: html
-    });
-
-    res.status(200).json({ success: true, message: "Order Mail Sent Successfully", info });
-  }
-  catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Failed To Send Mail", error });
   }
 });
 
@@ -73,39 +47,17 @@ app.use("/api/products", productRoutes);
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
 
-// // cart route
-// const cartRoutes = require("./routes/cartRoutes");
-// app.use("/api/cart", cartRoutes);
+// admin route
+const paymentRoutes = require("./routes/paymentRoutes");
+app.use("/api/payment", paymentRoutes);
 
-// // order route
-// const orderRoutes = require("./routes/orderRoutes");
-// app.use("/api/orders", orderRoutes);
+// order route
+const orderRoutes = require("./routes/orderRoutes");
+app.use("/api/orders", orderRoutes);
 
 
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-
 module.exports = app;
-
-
-
-
-// // admin route
-// const adminRoutes = require("./routes/adminRoutes");
-// app.use("/api/users", adminRoutes);
-
-
-// // product route
-// const productRoutes = require("./routes/productRoutes");
-// app.use("/api/products", productRoutes);
-
-// // cart route
-// const cartRoutes = require("./routes/cartRoutes");
-// app.use("/api/cart", cartRoutes);
-
-// // order route
-// const orderRoutes = require("./routes/orderRoutes");
-// app.use("/api/orders", orderRoutes);
-

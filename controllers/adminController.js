@@ -8,6 +8,7 @@ const SECRET_KEY = process.env.ADMIN_SECRET_KEY;
 // ================= REGISTER ADMIN =================
 const registerAdminController = async (req, res) => {
   try {
+    // console.log("admin registered api hitted")
     const { firstname, lastname, email, password, confirmpassword } = req.body;
 
     // VALIDATION
@@ -33,17 +34,16 @@ const registerAdminController = async (req, res) => {
     // CREATE ADMIN
     const adminData = new adminDB({ firstname, lastname, email, password, adminprofile: uploadedImage.secure_url });
 
+    // console.log("admin uploaded url is", uploadedImage.secure_url);
+
     // SAVE ADMIN
     const savedAdmin = await adminData.save();
 
-    res.status(201).json({
-      message: "Admin registered successfully",
-      admin: { _id: savedAdmin._id, firstname: savedAdmin.firstname, lastname: savedAdmin.lastname, email: savedAdmin.email, adminprofile: savedAdmin.adminprofile }
-    });
+    res.send("Admin registered successfully");
 
   } catch (error) {
-    console.log("Register Admin Error:", error);
-    res.status(500).json({ error: "Server Error" });
+    // console.log("Register Admin Error:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -51,26 +51,29 @@ const registerAdminController = async (req, res) => {
 // ================= LOGIN ADMIN =================
 
 const loginAdminController = async (req, res) => {
+  // console.log("admin login api hitted");
+
+  const { email, password } = req.body;
+  // console.log("req body is", req.body);
+
+  // VALIDATION
+  if (!email || !password) {
+    return res.status(400).json({ error: "All fields required" });
+  }
+
   try {
-    const { email, password } = req.body;
-
-    // VALIDATION
-    if (!email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
     // FIND ADMIN
     const adminValid = await adminDB.findOne({ email });
 
     if (!adminValid) {
-      return res.status(400).json({ error: "Invalid Credentials" });
+      return res.status(400).json({ error: "Invalid Details" });
     }
 
-    // PASSWORD CHECK
+    // PASSWORD MATCH
     const isMatch = await bcrypt.compare(password, adminValid.password);
 
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid Credentials" });
+      return res.status(400).json({ error: "Invalid Details" });
     }
 
     // REMOVE EXPIRED TOKENS
@@ -85,27 +88,23 @@ const loginAdminController = async (req, res) => {
 
     // GENERATE NEW TOKEN
     const token = await adminValid.generateadminAuthToken();
-    // MAX 3 DEVICES LOGIN
+
+    // LIMIT MAX 3 TOKENS
     if (adminValid.tokens.length > 3) {
-      adminValid.tokens =
-        adminValid.tokens.slice(-3);
+      adminValid.tokens = adminValid.tokens.slice(-3);
     }
     await adminValid.save();
 
-    // RESPONSE
-    res.status(200).json({
-      message: "Login Successful",
-      admin: { _id: adminValid._id, firstname: adminValid.firstname, lastname: adminValid.lastname, email: adminValid.email, adminprofile: adminValid.adminprofile }, token
-    });
 
+    // console.log("admin valid and token is", { adminValid, token });
+
+    // RESPONSE
+    res.status(200).json({ adminValid, token });
   } catch (error) {
-    console.log("Login Error:", error);
+    // console.log(error);
     res.status(500).json({ error: "Server Error" });
   }
 };
-
-
-// ================= VERIFY ADMIN =================
 
 const adminverifyController = async (req, res) => {
   try {
@@ -128,7 +127,7 @@ const logoutController = async (req, res) => {
     await admin.save();
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    console.log("Logout Error:", error);
+    // console.log("Logout Error:", error);
     res.status(500).json({ error: "Logout failed" });
   }
 };

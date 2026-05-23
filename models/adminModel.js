@@ -59,14 +59,14 @@ const adminSchema = new mongoose.Schema({
 
 
 // ================= PASSWORD HASHING =================
-adminSchema.pre("save", async function (next) {
+adminSchema.pre("save", async function () {
   try {
     if (this.isModified("password")) {
       this.password = await bcrypt.hash(this.password, 12);
     }
-    next();
   } catch (error) {
-    next(error);
+    // console.log("Password Hashing Error:", error);
+    throw error;
   }
 });
 
@@ -79,7 +79,7 @@ adminSchema.methods.generateadminAuthToken = async function () {
     await this.save();
     return newtoken;
   } catch (error) {
-    console.log("Token Generation Error:", error);
+    // console.log("Token Generation Error:", error);
     throw error;
   }
 };

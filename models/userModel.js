@@ -56,12 +56,12 @@ const userSchema = new mongoose.Schema({
 userSchema.pre("save", async function () {
   try {
     if (this.isModified("password")) {
-      console.log("Before hash:", this.password);
+      // console.log("Before hash:", this.password);
       this.password = await bcrypt.hash(this.password, 12);
-      console.log("After hash:", this.password);
+      // console.log("After hash:", this.password);
     }
   } catch (error) {
-    console.log("error in pre method password hashing", error);
+    // console.log("error in pre method password hashing", error);
     throw error; // ✅ important
   }
 });
