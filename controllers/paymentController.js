@@ -117,7 +117,7 @@ exports.sendOrderMail = async (req, res) => {
       totalPrice,
     });
 
-    await transporter.sendMail({
+    const sentMail = await transporter.sendMail({
       from: process.env.EMAIL,
       to: user.email,
       subject: "Order Confirmed 🎉",
@@ -125,6 +125,7 @@ exports.sendOrderMail = async (req, res) => {
     });
 
     console.log("MAIL SENT SUCCESSFULLY");
+    // console.log(JSON.stringify(sentMail, null, 2));
 
     return res.status(200).json({
       success: true,
